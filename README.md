@@ -1,25 +1,27 @@
-📁 实验文件+数据和模型
-/base/path
-├── diffsynth4MT/                           # 主实验目录
-│   ├── FastVMT_incremental.py             # ✅ 核心实验脚本
-│   ├── parallel_experiment_manager.sh     # ✅ 并行管理器
-│   ├── incremental_experiment.sh          # ✅ 增量实验脚本
-│   ├── check_experiment_progress.py       # ✅ 进度检查脚本
-│   ├── config.env.template               # ✅ 配置模板
-│   ├── 运行操作指南.md                    # ✅ 使用说明
-│   ├── test_parallel_setup.sh            # ✅ 测试脚本
-│   ├── test_random_seeds.sh              # ✅ 随机种子测试
-│   └── setup_new_host.sh                 # ✅ 自动配置脚本
-├── Final_Dataset/                         # 数据集目录
-│   ├── prompt.json                        # prompts文件
-│   ├── camera_motion/                     # 各类别视频
-│   ├── single_object/
-│   ├── multiple_objects/
-│   └── complex_human_motion/
-├── pretrained_models/                     # 预训练模型
-│   └── Wan-AI/Wan2.1-T2V-14B/           # 模型文件
-└── logs/                                  # 日志目录 (可选)
+## 📂 项目目录结构
 
+```text
+/base/path
+├── diffsynth4MT/                  # 主实验目录
+│   ├── FastVMT_incremental.py     # ✅ 核心实验脚本
+│   ├── parallel_experiment_manager.sh  # ✅ 并行实验管理器
+│   ├── incremental_experiment.sh       # ✅ 增量实验脚本
+│   ├── check_experiment_progress.py    # ✅ 进度检查脚本
+│   ├── config.env.template             # ✅ 配置环境模板
+│   └── 运行操作指南.md                  # ✅ 使用说明
+│
+├── Final_Dataset/                  # 数据集目录
+│   ├── prompt.json                 # prompts 文件
+│   ├── camera_motion/              # 各类别视频（相机运动）
+│   ├── single_object/              # 单物体视频
+│   ├── multiple_objects/           # 多物体视频
+│   └── complex_human_motion/       # 复杂人体运动视频
+│
+├── pretrained_models/              # 预训练模型
+│   └── Wan-AI/Wan2.1-T2V-14B/      # ✅ Wan 2.1 T2V 14B 模型文件
+│
+└── logs/                           # 日志目录（可选）
+```
 ```bash
 conda create -n diffsynth
 conda activate diffsynth
