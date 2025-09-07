@@ -1,0 +1,85 @@
+{
+  "environment": {
+    "conda_path": "/root/miniconda3/etc/profile.d/conda.sh",
+    "conda_env": "diffsynth",
+    "work_dir": "/root/autodl-tmp/diffsynth4MT-main/diffsynth/ICLR实验脚本和数据"
+  },
+  "paths": {
+    "base_path": "/root/autodl-tmp/Final_Dataset",
+    "prompt_file": "/root/autodl-tmp/Final_Dataset/prompt.json",
+    "output_dir": "/root/autodl-tmp/results_final",
+    "log_dir": "/root/autodl-tmp/logs",
+    "temp_dir": "/root/autodl-tmp/temp",
+    "backup_dir": "/root/autodl-tmp/backup",
+    "categories": {
+      "camera_motion": "/root/autodl-tmp/Final_Dataset/camera_motion",
+      "single_object": "/root/autodl-tmp/Final_Dataset/single_object",
+      "multiple_objects": "/root/autodl-tmp/Final_Dataset/multiple_objects",
+      "complex_human_motion": "/root/autodl-tmp/Final_Dataset/complex_human_motion"
+    }
+  },
+  "model": {
+    "base_path": "/root/autodl-tmp/pretrained_model/Wan-AI",
+    "diffusion_models": [
+      "Wan2.1-T2V-14B/diffusion_pytorch_model-00001-of-00006.safetensors",
+      "Wan2.1-T2V-14B/diffusion_pytorch_model-00002-of-00006.safetensors", 
+      "Wan2.1-T2V-14B/diffusion_pytorch_model-00003-of-00006.safetensors",
+      "Wan2.1-T2V-14B/diffusion_pytorch_model-00004-of-00006.safetensors",
+      "Wan2.1-T2V-14B/diffusion_pytorch_model-00005-of-00006.safetensors",
+      "Wan2.1-T2V-14B/diffusion_pytorch_model-00006-of-00006.safetensors"
+    ],
+    "t5_model": "Wan2.1-T2V-14B/models_t5_umt5-xxl-enc-bf16.pth",
+    "vae_model": "Wan2.1-T2V-14B/Wan2.1_VAE.pth"
+  },
+  "experiment": {
+    "gpu_config": {
+      "auto_detect": true,
+      "available_gpus": [],
+      "manual_assignment": {},
+      "min_memory_gb": 16,
+      "exclude_gpus": []
+    },
+    "gpu_categories": {
+      "0": "camera_motion",
+      "1": "single_object", 
+      "2": "multiple_objects",
+      "3": "complex_human_motion"
+    },
+    "parallel_config": {
+      "processes_per_gpu": 2,
+      "memory_fraction_per_process": 0.45,
+      "file_split_strategy": "balanced",
+      "enable_seed_parallel": true,
+      "max_concurrent_videos": 2,
+      "enable_incremental": true,
+      "checkpoint_interval": 10
+    },
+    "modes": {
+      "batch": {
+        "enabled": true,
+        "description": "批量处理所有数据"
+      },
+      "incremental": {
+        "enabled": true,
+        "description": "增量处理新增数据",
+        "skip_existing": true,
+        "backup_existing": false
+      },
+      "single_gpu": {
+        "enabled": true,
+        "description": "单GPU模式"
+      }
+    },
+    "seeds": [42, 512],
+    "generation_params": {
+      "num_inference_steps": 50,
+      "num_frames": 81,
+      "height": 480,
+      "width": 832,
+      "fps": 15,
+      "quality": 5,
+      "num_persistent": 50000000,
+      "negative_prompt": "光线混乱，变形，扭曲，几何畸变，发光边缘，光晕，运动模糊过曝，静态，画面扭曲，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走"
+    }
+  }
+}
