@@ -251,11 +251,10 @@ class CrossAttention(nn.Module):
         else:
             ctx = y
         if self.training:
-            with torch.autograd.graph.save_on_cpu(pin_memory=True):
-                q = self.norm_q(self.q(x))
-                k = self.norm_k(self.k(ctx))
-                v = self.v(ctx)
-                x = self.attn(q, k, v)
+            q = self.norm_q(self.q(x))
+            k = self.norm_k(self.k(ctx))
+            v = self.v(ctx)
+            x = self.attn(q, k, v)
         else:
             q = self.norm_q(self.q(x))
             k = self.norm_k(self.k(ctx))
@@ -308,8 +307,8 @@ class DiTBlock(nn.Module):
         input_x = modulate(self.norm2(x), shift_mlp, scale_mlp)
         ffn_output = self.ffn(input_x)
         if self.training:
-            with torch.autograd.graph.save_on_cpu(pin_memory=True):
-                x = self.gate(x, gate_mlp, ffn_output)
+            
+            x = self.gate(x, gate_mlp, ffn_output)
         else:
             x = self.gate(x, gate_mlp, ffn_output)
         return x
@@ -424,11 +423,11 @@ class WanModel(torch.nn.Module):
                 **kwargs,
                 ):
         return_intermediates = kwargs.get('return_intermediates', False)
-        with torch.autograd.graph.save_on_cpu(pin_memory=True):
-            t = self.time_embedding(
-                sinusoidal_embedding_1d(self.freq_dim, timestep))
-            t_mod = self.time_projection(t).unflatten(1, (6, self.dim))
-            context = self.text_embedding(context)
+    
+        t = self.time_embedding(
+            sinusoidal_embedding_1d(self.freq_dim, timestep))
+        t_mod = self.time_projection(t).unflatten(1, (6, self.dim))
+        context = self.text_embedding(context)
         
         if self.has_image_input:
             x = torch.cat([x, y], dim=1)  # (b, c_x + c_y, f, h, w)
@@ -437,12 +436,12 @@ class WanModel(torch.nn.Module):
         
         x, (f, h, w) = self.patchify(x)
         
-        with torch.autograd.graph.save_on_cpu(pin_memory=True):
-            freqs = torch.cat([
-                self.freqs[0][:f].view(f, 1, 1, -1).expand(f, h, w, -1),
-                self.freqs[1][:h].view(1, h, 1, -1).expand(f, h, w, -1),
-                self.freqs[2][:w].view(1, 1, w, -1).expand(f, h, w, -1)
-            ], dim=-1).reshape(f * h * w, 1, -1).to(x.device)
+
+        freqs = torch.cat([
+            self.freqs[0][:f].view(f, 1, 1, -1).expand(f, h, w, -1),
+            self.freqs[1][:h].view(1, h, 1, -1).expand(f, h, w, -1),
+            self.freqs[2][:w].view(1, 1, w, -1).expand(f, h, w, -1)
+        ], dim=-1).reshape(f * h * w, 1, -1).to(x.device)
             
         def create_custom_forward(module):
             def custom_forward(*inputs):
@@ -473,9 +472,9 @@ class WanModel(torch.nn.Module):
             if return_intermediates:
                 intermediates.append(x)
         if self.training:
-            with torch.autograd.graph.save_on_cpu(pin_memory=True):
-                x = self.head(x, t)
-                x = self.unpatchify(x, (f, h, w))
+            
+            x = self.head(x, t)
+            x = self.unpatchify(x, (f, h, w))
         else:
             x = self.head(x, t)
             x = self.unpatchify(x, (f, h, w))

@@ -448,29 +448,29 @@ class WanVideoPipeline(BasePipeline):
                     window_w = v_j_approx.view(num_tiles_h,num_tiles_w).unsqueeze(-1).unsqueeze(-1) + self.w_offsets
                     window_h = window_h.clamp(half_l, h - half_l - 1).long()
                     window_w = window_w.clamp(half_l, w - half_l - 1).long()
-                    with torch.autograd.graph.save_on_cpu(pin_memory=True):
+                    #with torch.autograd.graph.save_on_cpu(pin_memory=True):
                         # extract K
-                        linear_indexes = window_h * w + window_w  # 计算线性索引
-                        linear_indexes_flat = linear_indexes.view(num_tiles_h*num_tiles_w, l*l)  # (h//tile_h * w//tile_w, l*l)
-                        indices_expanded = linear_indexes_flat.unsqueeze(-1).expand(-1, -1, D_h).transpose(-1, -2)  # (hs x ws, l*l, D_h)
-                        K_expanded = K[j].unsqueeze(1).expand(-1, l*l, -1).transpose(-1, -2)  # (h x w, l*l, D_h)
-                        Q_expanded = Q[i].reshape(num_tiles_h, tile_h, num_tiles_w, tile_w, D_h).permute(0, 2, 1, 3, 4).reshape(-1, tile_h * tile_w, D_h)
+                    linear_indexes = window_h * w + window_w  # 计算线性索引
+                    linear_indexes_flat = linear_indexes.view(num_tiles_h*num_tiles_w, l*l)  # (h//tile_h * w//tile_w, l*l)
+                    indices_expanded = linear_indexes_flat.unsqueeze(-1).expand(-1, -1, D_h).transpose(-1, -2)  # (hs x ws, l*l, D_h)
+                    K_expanded = K[j].unsqueeze(1).expand(-1, l*l, -1).transpose(-1, -2)  # (h x w, l*l, D_h)
+                    Q_expanded = Q[i].reshape(num_tiles_h, tile_h, num_tiles_w, tile_w, D_h).permute(0, 2, 1, 3, 4).reshape(-1, tile_h * tile_w, D_h)
                         
-                        #delta_u, delta_v = self.compute_displacement_in_window(K_expanded, Q_expanded, posi_u_in_window, posi_v_in_window, indices_expanded, D_h, tau, S, half_l)
-                        K_gathered = torch.gather(K_expanded, 0, indices_expanded)  # (hs x ws, l*l, D_h)
+                    #delta_u, delta_v = self.compute_displacement_in_window(K_expanded, Q_expanded, posi_u_in_window, posi_v_in_window, indices_expanded, D_h, tau, S, half_l)
+                    K_gathered = torch.gather(K_expanded, 0, indices_expanded)  # (hs x ws, l*l, D_h)
                         
-                        K_window_mean = K_gathered.mean(dim=1)  # (hs x ws, D_h)
-                        K_wind.append(K_window_mean)  # 保存当前窗口的 K 矩阵
+                    K_window_mean = K_gathered.mean(dim=1)  # (hs x ws, D_h)
+                    K_wind.append(K_window_mean)  # 保存当前窗口的 K 矩阵
                         
-                        A_ij = (torch.matmul(Q_expanded, K_gathered) / (D_h ** 0.5)) # (hs x ws, tile_h*tile_w, l*l)                   
-                        A_ij = F.softmax(A_ij.reshape(S, -1) * tau, dim=-1)
-                        # calculate the displacement from the center of the window
-                        u_j_approx = torch.sum(A_ij * self.posi_u_in_window, dim=-1) # (S,)
-                        v_j_approx = torch.sum(A_ij * self.posi_v_in_window, dim=-1) # (S,)
-                        delta_u = u_j_approx - self.orig_u
-                        delta_v = v_j_approx - self.orig_v
-                        # 构建块位移矩阵
-                        Delta_ij = torch.stack([delta_u, delta_v], dim=-1)
+                    A_ij = (torch.matmul(Q_expanded, K_gathered) / (D_h ** 0.5)) # (hs x ws, tile_h*tile_w, l*l)                   
+                    A_ij = F.softmax(A_ij.reshape(S, -1) * tau, dim=-1)
+                    # calculate the displacement from the center of the window
+                    u_j_approx = torch.sum(A_ij * self.posi_u_in_window, dim=-1) # (S,)
+                    v_j_approx = torch.sum(A_ij * self.posi_v_in_window, dim=-1) # (S,)
+                    delta_u = u_j_approx - self.orig_u
+                    delta_v = v_j_approx - self.orig_v
+                    # 构建块位移矩阵
+                    Delta_ij = torch.stack([delta_u, delta_v], dim=-1)
                     AMF.append(Delta_ij)
                     #AMF[j - i].append(Delta_ij)  # 将结果添加到对应的列表中
             if len(K_wind) != 0:
@@ -654,6 +654,8 @@ class WanVideoPipeline(BasePipeline):
                     self.dit.train()
                     #if j % interval == 0 or use_AMF:
                     #if j % interval == 0:
+                    for param in self.dit.parameters():
+                        param.requires_grad_(False)
                     if j % interval == 0 or mode == 'AMF':
                         _ = self.dit(optimized_latents, timestep=timestep, size_info=size_info, preserve_space=True, **detached_prompt_emb_posi_new, **image_emb, **extra_input)
 
