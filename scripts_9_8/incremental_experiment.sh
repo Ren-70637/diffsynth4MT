@@ -181,7 +181,7 @@ get_max_gpu_id() {
 }
 
 # 合并prompts文件
-merge_prompts() {
+'''merge_prompts() {
     local temp_prompts="/tmp/merged_prompts_$$.json"
     
     # 静默执行，不显示颜色
@@ -230,7 +230,7 @@ EOF
     
     echo $temp_prompts
 }
-
+'''
 # 启动增量实验
 start_incremental_experiment() {
     local gpu_id=$1
@@ -288,7 +288,8 @@ main() {
     print_message $GREEN "选择GPU: $selected_gpu"
     
     # 合并prompts
-    merged_prompts=$(merge_prompts)
+    # merged_prompts=$(merge_prompts)
+    merged_prompts=$NEW_PROMPTS_FILE
     print_message $GREEN "Prompts合并完成: $merged_prompts"
     
     # 创建输出目录
