@@ -256,13 +256,14 @@ start_incremental_experiment() {
     local conda_base="${CONDA_BASE:-/root/miniconda3}"
     local conda_env="${CONDA_ENV:-diffsynth}"
     local work_dir="${EXPERIMENT_WORK_DIR:-$(pwd)}"
-    
+
+    tmux send-keys -t \"$session_name\" \"source ${work_dir}/config.env\" C-m
     tmux send-keys -t "$session_name" "source ${conda_base}/etc/profile.d/conda.sh" C-m
     tmux send-keys -t "$session_name" "conda activate ${conda_env}" C-m
     tmux send-keys -t "$session_name" "cd ${work_dir}" C-m
     
     # 构建Python命令 - 只处理新增数据
-    local python_cmd="python FastVMT_incremental.py --gpu_id $gpu_id --category '$CATEGORY' --output_dir '$OUTPUT_DIR' --ref_prompts_path '$merged_prompts' --base_path '$NEW_VIDEOS_DIR' --num_persistent 50000000 --incremental_mode"
+    local python_cmd="python FastVMT_incremental.py --gpu_id $gpu_id --category '$CATEGORY' --output_dir '$OUTPUT_DIR' --ref_prompts_path '$merged_prompts' --base_path '$NEW_VIDEOS_DIR' --model_base_dir \"$MODEL_BASE_DIR\" --log_base_dir \"$EXPERIMENT_LOG_DIR\" --num_persistent 50000000 --incremental_mode"
     
     tmux send-keys -t "$session_name" "$python_cmd" C-m
     

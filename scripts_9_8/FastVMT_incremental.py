@@ -195,10 +195,11 @@ def main(args):
     # 处理视频
     processed_count = 0
     # 生成随机种子
-    seeds = [random.randint(1, 10000), random.randint(1, 10000)]
+    # seeds = [random.randint(1, 10000), random.randint(1, 10000)]
     
     for video_key, prompts in videos.items():
         # 根据category确定视频文件路径
+        seeds = [random.randint(1, 10000), random.randint(1, 10000)]
         input_video_path = os.path.join(args.base_path, video_key + ".mp4")
         
         logger.info(f"处理视频: {input_video_path}")
